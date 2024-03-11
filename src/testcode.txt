@@ -19,7 +19,7 @@
 const int Pins = 15;
 int PinCounts[Pins];
 int brightness[Pins] = {0};
-const int fadeDelay = 30; // Delay between brightness increments
+const int fadeDelay = 10; // Delay between brightness increments
 // Function declarations
 void updateBrightness(int pinIndex, int targetBrightness);
 int getPin(int pinIndex);
@@ -46,7 +46,7 @@ void setup() {
 void loop() {
   // GENERATE BRIGHTNESS AND STORE IN PinCounts ARRAY
   for (int i = 0; i < Pins; ++i) {
-    PinCounts[i] = random(0, 200);
+    PinCounts[i] = random(0, 256);
   }
   // DISPLAY GENERATED BRIGHTNESS 
   Serial.println("Random Brightness values:");
@@ -125,4 +125,90 @@ int getPin(int pinIndex) {
     return LED_PIN_15;
   else
     return -1;
+}
+
+-LATEST 
+#include <Arduino.h>
+#include <esp32-hal-ledc.h>
+
+#define LED_PIN_1 21
+#define LED_PIN_2 22
+#define LED_PIN_3 23
+#define LED_PIN_4 18
+#define LED_PIN_5 5
+#define LED_PIN_6 19
+#define LED_PIN_7 17
+#define LED_PIN_8 14
+#define LED_PIN_9 4
+#define LED_PIN_10 2
+#define LED_PIN_11 15
+#define LED_PIN_12 32
+#define LED_PIN_13 33
+#define LED_PIN_14 26
+#define LED_PIN_15 27
+
+const int Pins = 15;
+int PinCounts[Pins];
+int ledChannels[Pins] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
+const int fadeDelay = 10; 
+const int freq = 19531; // Frequency in Hz
+const int resolution = 10; // PWM resolution (8, 10, 12, 15)
+
+void updateBrightness(int pinIndex, int targetBrightness); // Function prototype
+
+void setup() {
+  Serial.begin(9600);
+
+  // Set LED PWM frequency and resolution
+  for (int i = 0; i < Pins; ++i) {
+    ledcSetup(ledChannels[i], freq, resolution);
+    ledcAttachPin(LED_PIN_1 + i, ledChannels[i]); 
+  }
+}
+
+void loop() {
+  // GENERATE BRIGHTNESS AND STORE IN PinCounts ARRAY
+  for (int i = 0; i < Pins; ++i) {
+    PinCounts[i] = random(0, 256);
+  }
+  // DISPLAY GENERATED BRIGHTNESS
+  Serial.println("Random Brightness values:");
+  for (int i = 0; i < Pins; ++i) {
+    Serial.print(PinCounts[i]);
+    Serial.print(" ");
+  }
+  Serial.println();
+
+  // SMOOTH FADING EFFECT
+  for (int i = 0; i < Pins; ++i) {
+    int targetBrightness = PinCounts[i];
+    updateBrightness(i, targetBrightness);
+  }
+
+  delay(1000);
+}
+
+// BRIGHTNESS INTENSITY FUNCTION
+void updateBrightness(int pinIndex, int targetBrightness) {
+  // Gradually adjust brightness to the target value
+  int currentBrightness = ledcRead(ledChannels[pinIndex]);
+  // If the targetBrightness lessthan 150 then currentBrightness Goes to 0
+  if (targetBrightness < 100) {
+    while (currentBrightness > 0) {
+      currentBrightness--;
+      ledcWrite(ledChannels[pinIndex], currentBrightness); // Corrected ledChannels
+      delay(fadeDelay);
+    }
+  } else {
+    // Otherwise, adjust brightness towards the target value
+    while (currentBrightness != targetBrightness) {
+      if (currentBrightness < targetBrightness) {
+        currentBrightness++;
+      } else {
+        currentBrightness--;
+      }
+      ledcWrite(ledChannels[pinIndex], currentBrightness); // Corrected ledChannels
+      delay(fadeDelay);
+    }
+  }
 }
