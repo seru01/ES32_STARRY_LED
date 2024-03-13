@@ -1,7 +1,6 @@
 #include <Arduino.h>
-#include <WiFi.h>
-#include <ESPAsyncWebServer.h>
-#include <AsyncElegantOTA.h>
+
+
 
 #define LED_PIN_1 21
 #define LED_PIN_2 22
@@ -19,51 +18,24 @@
 #define LED_PIN_14 26
 #define LED_PIN_15 27
 
-//WIFI ACCESS POINT PROVISIONING
-const String ssid = "STARY_LED";
-const String password = "@STARY_LED098";
+//Provisioning
+const char* ssid = "STARY_LED";
+const char* password = "@STARY_LED098";
+
 IPAddress staticIP(192, 168, 4, 2);
 IPAddress gateway(192, 168, 4, 1);
 IPAddress subnet(255, 255, 255, 0);
 
-
-//PINS DECLARATION
 const int Pins = 15;
 int PinCounts[Pins];
 int brightness[Pins] = {0};
-const int fadeDelay = 25; // Delay between brightness increments
-
-// Variable to keep track of OTA availability time
-unsigned long otaStartTime;
-
+const int fadeDelay = 30; // Delay between brightness increments
 // Function declarations
 void updateBrightness(int pinIndex, int targetBrightness);
 int getPin(int pinIndex);
 
-AsyncWebServer server(80);
-
 void setup() {
   Serial.begin(9600); 
-  WiFi.mode(WIFI_AP);
-
-  // Start the access point
-  String macAddress = WiFi.softAPmacAddress();
-  WiFi.softAP(ssid + "_" + macAddress, password);
-
-  // Get the IP address of the hotspot
-  WiFi.softAPConfig(staticIP, gateway, subnet);
-
-  // Print the SSID and IP address of the hotspot to the serial monitor
-  Serial.println("Access Point started");
-  Serial.print("SSID: ");
-  Serial.println(ssid + "_" + macAddress);
-  Serial.print("IP address (Access Point Mode) : ");
-  Serial.println(WiFi.softAPIP());
-  // Initialize AsyncElegantOTA
-  AsyncElegantOTA.begin(&server);  
-  // Add handlers for OTA
-  server.begin();
-
   pinMode(LED_PIN_1, OUTPUT); 
   pinMode(LED_PIN_2, OUTPUT); 
   pinMode(LED_PIN_3, OUTPUT);
@@ -79,25 +51,13 @@ void setup() {
   pinMode(LED_PIN_13, OUTPUT); 
   pinMode(LED_PIN_14, OUTPUT); 
   pinMode(LED_PIN_15, OUTPUT);
-
-  // Record the start time of OTA availability
-  otaStartTime = millis();
-  
 }
 
 void loop() {
-  // Check if OTA time has elapsed
-  if (millis() - otaStartTime >= 30 * 60 * 1000) { // 30 minutes in milliseconds
-    // Stop the server and disable OTA
-    server.end();
-    WiFi.mode(WIFI_OFF);
-  }
-
   // GENERATE BRIGHTNESS AND STORE IN PinCounts ARRAY
   for (int i = 0; i < Pins; ++i) {
     PinCounts[i] = random(0, 200);
   }
-
   // DISPLAY GENERATED BRIGHTNESS 
   Serial.println("Random Brightness values:");
   for (int i = 0; i < Pins; ++i) {
@@ -141,25 +101,38 @@ void updateBrightness(int pinIndex, int targetBrightness) {
     }
   }
 }
-
 // SET PINS INDEX for BRIGHTNESS ARRAY VALUES 
 int getPin(int pinIndex) {
-  switch (pinIndex) {
-    case 0: return LED_PIN_1;
-    case 1: return LED_PIN_2;
-    case 2: return LED_PIN_3;
-    case 3: return LED_PIN_4;
-    case 4: return LED_PIN_5;
-    case 5: return LED_PIN_6;
-    case 6: return LED_PIN_7;
-    case 7: return LED_PIN_8;
-    case 8: return LED_PIN_9;
-    case 9: return LED_PIN_10;
-    case 10: return LED_PIN_11;
-    case 11: return LED_PIN_12;
-    case 12: return LED_PIN_13;
-    case 13: return LED_PIN_14;
-    case 14: return LED_PIN_15;
-    default: return -1;
-  }
+  if (pinIndex == 0)
+    return LED_PIN_1;
+  else if (pinIndex == 1)
+    return LED_PIN_2;
+  else if (pinIndex == 2)
+    return LED_PIN_3;
+  else if (pinIndex == 3)
+    return LED_PIN_4;
+  else if (pinIndex == 4)
+    return LED_PIN_5;
+  else if (pinIndex == 5)
+    return LED_PIN_6;
+  else if (pinIndex == 6)
+    return LED_PIN_7;
+  else if (pinIndex == 7)
+    return LED_PIN_8;
+  else if (pinIndex == 8)
+  return LED_PIN_9;
+  else if (pinIndex == 9)
+    return LED_PIN_10;
+  else if (pinIndex == 10)
+    return LED_PIN_11;
+  else if (pinIndex == 11)
+    return LED_PIN_12;
+  else if (pinIndex == 12)
+    return LED_PIN_13;
+  else if (pinIndex == 13)
+    return LED_PIN_14;
+  else if (pinIndex == 14)
+    return LED_PIN_15;
+  else
+    return -1;
 }
