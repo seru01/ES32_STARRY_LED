@@ -80,6 +80,21 @@ void setup() {
   pinMode(LED_PIN_14, OUTPUT); 
   pinMode(LED_PIN_15, OUTPUT);
 
+// Initialize Pin Output Limit Current
+  int LED_PINS[] = {
+    LED_PIN_1, LED_PIN_2, LED_PIN_3, LED_PIN_4, LED_PIN_5, 
+    LED_PIN_6, LED_PIN_7, LED_PIN_8, LED_PIN_9, LED_PIN_10, 
+    LED_PIN_11, LED_PIN_12, LED_PIN_13, LED_PIN_14, LED_PIN_15
+  };
+
+  // Set the initial brightness of all LED pins
+  for(int i = 0; i < 15; i++) {
+    Serial.println("Initializing LED");
+    Serial.print("LED Pin: ");
+    Serial.println(LED_PINS[i]);
+    digitalWrite(LED_PINS[i], LOW);
+    delay(100);
+  }
   // Record the start time of OTA availability
   otaStartTime = millis();
   
@@ -95,7 +110,7 @@ void loop() {
 
   // GENERATE BRIGHTNESS AND STORE IN PinCounts ARRAY
   for (int i = 0; i < Pins; ++i) {
-    PinCounts[i] = random(0, 200);
+    PinCounts[i] = random(0, 180);
   }
 
   // DISPLAY GENERATED BRIGHTNESS 
@@ -114,7 +129,7 @@ void loop() {
 
   delay(1000); 
 }
-
+  
 // BRIGHTNESS INTENSITY FUNCTION
 void updateBrightness(int pinIndex, int targetBrightness) {
   // Gradually adjust brightness to the target value
